@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hazelcast-client>
+    <import resource="classpath:client-group-config.xml"/>
+    <group>
+        <name>training</name>
+        <password>dev-pass</password>
+    </group>
+</hazelcast-client>
