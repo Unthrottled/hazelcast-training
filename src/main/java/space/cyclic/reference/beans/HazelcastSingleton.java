@@ -1,9 +1,6 @@
 package space.cyclic.reference.beans;
 
-import com.hazelcast.config.ClasspathXmlConfig;
-import com.hazelcast.config.Config;
-import com.hazelcast.config.ExecutorConfig;
-import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.*;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import org.apache.log4j.Logger;
@@ -11,20 +8,25 @@ import org.apache.log4j.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
+import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.inject.Singleton;
+import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.concurrent.Future;
 
 @Startup
 @Singleton
 public class HazelcastSingleton {
     private static Logger logger = Logger.getLogger(HazelcastSingleton.class);
+
     HazelcastInstance hazelcastMember;
 
     @PostConstruct
     public void startHazelcastNode(){
-        Config hazelcastConfig = new ClasspathXmlConfig("hazelcast-client.xml");
-
+        String thing = Thread.currentThread().getContextClassLoader().getResource("hazelcast-client.xml").getFile();
+        Config hazelcastConfig = new Config().setConfigurationFile(new File(thing));
         ExecutorConfig executorConfig = new ExecutorConfig()
                 .setName("space.cyclic.reference.bestExecutor")
                 .setPoolSize(15);
