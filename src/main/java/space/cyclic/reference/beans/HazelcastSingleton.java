@@ -1,6 +1,9 @@
 package space.cyclic.reference.beans;
 
-import com.hazelcast.config.*;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.ExecutorConfig;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import org.apache.log4j.Logger;
@@ -11,9 +14,6 @@ import javax.ejb.Asynchronous;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.concurrent.Future;
 
 @Startup
@@ -21,11 +21,12 @@ import java.util.concurrent.Future;
 public class HazelcastSingleton {
     private static Logger logger = Logger.getLogger(HazelcastSingleton.class);
 
-    HazelcastInstance hazelcastMember;
+    HazelcastInstance hazelcastMemberOne;
+    HazelcastInstance hazelcastMemberTwo;
 
     @PostConstruct
     public void startHazelcastNode(){
-        String thing = Thread.currentThread().getContextClassLoader().getResource("hazelcast-client.xml").getFile();
+        String thing = getClass().getClassLoader().getResource("hazelcast-client.xml").getFile();
         Config hazelcastConfig = new Config().setConfigurationFile(new File(thing));
         ExecutorConfig executorConfig = new ExecutorConfig()
                 .setName("space.cyclic.reference.bestExecutor")
@@ -42,8 +43,16 @@ public class HazelcastSingleton {
 
         hazelcastConfig.setProperty("hazelcast.logging.type", "log4j");
 
-        hazelcastMember = Hazelcast.newHazelcastInstance(hazelcastConfig);
-        logger.warn("Member Initialized");
+        hazelcastMemberOne = Hazelcast.newHazelcastInstance(hazelcastConfig);
+
+        NetworkConfig networkConfig = new NetworkConfig();
+        networkConfig.setPort(9702);
+        hazelcastConfig.setNetworkConfig(networkConfig);
+
+        hazelcastConfig.setNetworkConfig(networkConfig);
+        hazelcastMemberTwo = Hazelcast.newHazelcastInstance(hazelcastConfig);
+
+        logger.warn("Members Initialized");
     }
 
     @Asynchronous
