@@ -9,6 +9,7 @@ import com.hazelcast.core.HazelcastInstance;
 import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Singleton;
@@ -28,6 +29,11 @@ public class HazelcastSingleton {
     public void startHazelcastNode(){
         String thing = getClass().getClassLoader().getResource("hazelcast-client.xml").getFile();
         Config hazelcastConfig = new Config().setConfigurationFile(new File(thing));
+
+        NetworkConfig networkConfig = new NetworkConfig();
+        networkConfig.setPort(9701);
+        hazelcastConfig.setNetworkConfig(networkConfig);
+
         ExecutorConfig executorConfig = new ExecutorConfig()
                 .setName("space.cyclic.reference.bestExecutor")
                 .setPoolSize(15);
@@ -45,14 +51,20 @@ public class HazelcastSingleton {
 
         hazelcastMemberOne = Hazelcast.newHazelcastInstance(hazelcastConfig);
 
-        NetworkConfig networkConfig = new NetworkConfig();
-        networkConfig.setPort(9702);
-        hazelcastConfig.setNetworkConfig(networkConfig);
+        NetworkConfig networkConfigMemberTwo = new NetworkConfig();
+        networkConfigMemberTwo.setPort(9702);
+        hazelcastConfig.setNetworkConfig(networkConfigMemberTwo);
 
-        hazelcastConfig.setNetworkConfig(networkConfig);
+        hazelcastConfig.setNetworkConfig(networkConfigMemberTwo);
         hazelcastMemberTwo = Hazelcast.newHazelcastInstance(hazelcastConfig);
 
         logger.warn("Members Initialized");
+    }
+
+    @PreDestroy
+    public void tidyUp(){
+        hazelcastMemberOne.shutdown();
+        hazelcastMemberTwo.shutdown();
     }
 
     @Asynchronous
