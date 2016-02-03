@@ -6,6 +6,8 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IQueue;
+import com.hazelcast.core.IdGenerator;
 import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -69,6 +71,19 @@ public class HazelcastSingleton {
 
     @Asynchronous
     public Future<String> getThing() {
-        return new AsyncResult<>("hazelcast thing works");
+        return new AsyncResult<>(String.format("hazelcast thing works\nidGenOne: %d\nidGenTwo: %d",
+                getIdGenForMemberOne(), getIdGenForMemberTwo()));
+    }
+
+    public IQueue<String> getQueueQ(){
+        return hazelcastMemberOne.getQueue("queueQ");
+    }
+
+    private long getIdGenForMemberOne(){
+        return hazelcastMemberOne.getIdGenerator("idGenerator").newId();
+    }
+
+    private long getIdGenForMemberTwo(){
+        return hazelcastMemberTwo.getIdGenerator("idGenerator").newId();
     }
 }
