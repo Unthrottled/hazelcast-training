@@ -22,4 +22,11 @@ public class HazelcastAdmin {
     public String getThing() throws ExecutionException, InterruptedException {
         return hazelcastSingleton.getThing().get();
     }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/get/destroyThing")
+    public String getDestroyThing() throws ExecutionException, InterruptedException {
+        return hazelcastSingleton.getDestroyThing().get();
+    }
 }

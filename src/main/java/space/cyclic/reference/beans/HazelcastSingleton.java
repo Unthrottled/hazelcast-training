@@ -23,6 +23,7 @@ import java.util.concurrent.Future;
 @Singleton
 public class HazelcastSingleton {
     private static Logger logger = Logger.getLogger(HazelcastSingleton.class);
+    private static final String queueQ = "queueQ";
 
     HazelcastInstance hazelcastMemberOne;
     HazelcastInstance hazelcastMemberTwo;
@@ -75,8 +76,28 @@ public class HazelcastSingleton {
                 getIdGenForMemberOne(), getIdGenForMemberTwo()));
     }
 
-    public IQueue<String> getQueueQ(){
-        return hazelcastMemberOne.getQueue("queueQ");
+    @Asynchronous
+    public Future<String> getDestroyThing(){
+        StringBuilder toReturn = new StringBuilder();
+        IQueue<String> queueOne = getQueueQMemberTwo();
+        IQueue<String> queueTwo = getQueueQMemberOne();
+        queueTwo.add("Best String Ever");
+        toReturn.append("Queue One Contents: ").append(queueOne.peek()).append('\n');
+        toReturn.append("Queue Two Contents: ").append(queueTwo.peek()).append('\n');
+        toReturn.append("Destroying Queue One Instance").append('\n');
+        queueOne.destroy();
+        toReturn.append("Queue One Contents after destruction: ").append(queueOne.peek()).append('\n');
+        toReturn.append("Queue Two Contents after destruction: ").append(queueTwo.peek()).append('\n');
+        return new AsyncResult<>(toReturn.toString());
+    }
+
+
+    public IQueue<String> getQueueQMemberOne(){
+        return hazelcastMemberOne.getQueue(queueQ);
+    }
+
+    public IQueue<String> getQueueQMemberTwo(){
+        return hazelcastMemberOne.getQueue(queueQ);
     }
 
     private long getIdGenForMemberOne(){
