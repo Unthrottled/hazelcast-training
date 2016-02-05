@@ -4,10 +4,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.ExecutorConfig;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NetworkConfig;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IQueue;
-import com.hazelcast.core.IdGenerator;
+import com.hazelcast.core.*;
 import org.apache.log4j.Logger;
 
 import javax.annotation.PostConstruct;
@@ -24,6 +21,11 @@ import java.util.concurrent.Future;
 public class HazelcastSingleton {
     private static Logger logger = Logger.getLogger(HazelcastSingleton.class);
     private static final String queueQ = "queueQ";
+    private static final String semaphoreOfSolitude = "best semaphore";
+    private static final String superSemaphore = "better than best semaphore";
+    private static final String megaSemaphore = "ultra semaphore";
+    private static final String partitionOne = "BestPartition";
+    private static final String partitionTwo = "BestPartition";
 
     HazelcastInstance hazelcastMemberOne;
     HazelcastInstance hazelcastMemberTwo;
@@ -54,15 +56,35 @@ public class HazelcastSingleton {
 
         hazelcastMemberOne = Hazelcast.newHazelcastInstance(hazelcastConfig);
 
+        /**
+         * Hazelcast config is not updatable: Once a HazelcastInstance is created, the Config that was used to
+         * create that HazelcastInstance should not be updated. A lot of the internal configuration objects
+         * are not thread-safe and there is no guarantee that a property is going to be read after it has been
+         * read for the first time.
+         */
+
+        Config hazelcastConfigTwo = new Config().setConfigurationFile(new File(thing));
+
         NetworkConfig networkConfigMemberTwo = new NetworkConfig();
         networkConfigMemberTwo.setPort(9702);
-        hazelcastConfig.setNetworkConfig(networkConfigMemberTwo);
+        hazelcastConfigTwo.setNetworkConfig(networkConfigMemberTwo);
 
         hazelcastConfig.setNetworkConfig(networkConfigMemberTwo);
-        hazelcastMemberTwo = Hazelcast.newHazelcastInstance(hazelcastConfig);
+        hazelcastMemberTwo = Hazelcast.newHazelcastInstance(hazelcastConfigTwo);
 
         logger.warn("Members Initialized");
     }
+
+    /**
+     * HazelcastInstance.shutdown(): If you are not using your HazelcastInstance anymore, make sure
+     * to shut it down by calling the shutdown() method on the HazelcastInstance. This will release all its
+     * resources and end network communication.
+     *
+     * Hazelcast.shutdownAll(): This method is very practical for testing purposes if you do not have
+     * control over the creation of Hazelcast instances, but you want to make sure that all instances are
+     * being destroyed.
+     *
+     */
 
     @PreDestroy
     public void tidyUp(){
@@ -91,6 +113,25 @@ public class HazelcastSingleton {
         return new AsyncResult<>(toReturn.toString());
     }
 
+    /**
+     * The other type is a non-partitioned data structure, like the IAtomicLong or the ISemaphore, where
+     * only a single partition is responsible for storing the main instance.
+     * @return
+     */
+    @Asynchronous
+    public Future<String> getPartitionThing(){
+        StringBuilder toReturn = new StringBuilder();
+        ISemaphore semaphoreOne = getSemaphoreOfSolitude();
+        ISemaphore semaphoreTwo = getSuperSemaphore();
+        ISemaphore semaphoreThree = getMegaSemaphore();
+        ISemaphore semaphoreFour = getSemaphoreOfSolitudeNoPartitionSpecified();
+        toReturn.append("Semaphore One Partition: ").append(semaphoreOne.getPartitionKey()).append('\n');
+        toReturn.append("Semaphore Two Partition: ").append(semaphoreTwo.getPartitionKey()).append('\n');
+        toReturn.append("Semaphore Three Partition: ").append(semaphoreThree.getPartitionKey()).append('\n');
+        toReturn.append("Semaphore Four Partition: ").append(semaphoreFour.getPartitionKey()).append('\n');
+        return new AsyncResult<>(toReturn.toString());
+    }
+
 
     public IQueue<String> getQueueQMemberOne(){
         return hazelcastMemberOne.getQueue(queueQ);
@@ -106,5 +147,21 @@ public class HazelcastSingleton {
 
     private long getIdGenForMemberTwo(){
         return hazelcastMemberTwo.getIdGenerator("idGenerator").newId();
+    }
+
+    public ISemaphore getSemaphoreOfSolitude() {
+        return hazelcastMemberOne.getSemaphore(semaphoreOfSolitude + "@" + partitionOne);
+    }
+
+    public ISemaphore getSemaphoreOfSolitudeNoPartitionSpecified() {
+        return hazelcastMemberOne.getSemaphore(semaphoreOfSolitude);
+    }
+
+    public ISemaphore getSuperSemaphore() {
+        return hazelcastMemberOne.getSemaphore(superSemaphore+ "@" + partitionTwo);
+    }
+
+    public ISemaphore getMegaSemaphore(){
+        return hazelcastMemberOne.getSemaphore(megaSemaphore);
     }
 }
