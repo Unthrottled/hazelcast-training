@@ -20,9 +20,9 @@
     Please see the schema for how to configure Hazelcast at https://hazelcast.com/schema/config/hazelcast-config-3.6.xsd 
     or the documentation at https://hazelcast.org/documentation/
 -->
-<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.6.xsd"
-           xmlns="http://www.hazelcast.com/schema/config"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<hazelcast xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.6.xsd"
+           xmlns="http://www.hazelcast.com/schema/config">
     <group>
         <name>training</name>
         <password>dev-pass</password>
@@ -44,9 +44,6 @@
             </multicast>
             <tcp-ip enabled="true">
                 <interface>127.0.0.1</interface>
-                <member-list>
-                    <member>127.0.0.1</member>
-                </member-list>
             </tcp-ip>
             <aws enabled="false">
                 <access-key>my-access-key</access-key>

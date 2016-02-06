@@ -6,13 +6,11 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.*;
 import org.apache.log4j.Logger;
+import space.cyclic.reference.ProjectConstants;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.ejb.AsyncResult;
-import javax.ejb.Asynchronous;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import javax.ejb.*;
 import java.io.File;
 import java.util.concurrent.Future;
 
@@ -31,14 +29,21 @@ public class HazelcastSingleton {
     HazelcastInstance hazelcastMemberOne;
     HazelcastInstance hazelcastMemberTwo;
 
+    @EJB
+    SystemPropertyExtraction systemPropertyExtraction;
+
     @PostConstruct
     public void startHazelcastNode() {
-        String thing = getClass().getClassLoader().getResource("hazelcast-client.xml").getFile();
-        Config hazelcastConfig = new Config().setConfigurationFile(new File(thing));
 
-        NetworkConfig networkConfig = new NetworkConfig();
-        networkConfig.setPort(9701);
-        hazelcastConfig.setNetworkConfig(networkConfig);
+        /**
+         * Hazelcast config is not updatable: Once a HazelcastInstance is created, the Config that was used to
+         * create that HazelcastInstance should not be updated. A lot of the internal configuration objects
+         * are not thread-safe and there is no guarantee that a property is going to be read after it has been
+         * read for the first time.
+         */
+
+        Config hazelcastConfig = new Config().setConfigurationFile(
+                new File(systemPropertyExtraction.getProperty(ProjectConstants.HAZELCAST_CLIENT)));
 
         ExecutorConfig executorConfig = new ExecutorConfig()
                 .setName("space.cyclic.reference.bestExecutor")
@@ -57,21 +62,7 @@ public class HazelcastSingleton {
 
         hazelcastMemberOne = Hazelcast.newHazelcastInstance(hazelcastConfig);
 
-        /**
-         * Hazelcast config is not updatable: Once a HazelcastInstance is created, the Config that was used to
-         * create that HazelcastInstance should not be updated. A lot of the internal configuration objects
-         * are not thread-safe and there is no guarantee that a property is going to be read after it has been
-         * read for the first time.
-         */
-
-        Config hazelcastConfigTwo = new Config().setConfigurationFile(new File(thing));
-
-        NetworkConfig networkConfigMemberTwo = new NetworkConfig();
-        networkConfigMemberTwo.setPort(9702);
-        hazelcastConfigTwo.setNetworkConfig(networkConfigMemberTwo);
-
-        hazelcastConfig.setNetworkConfig(networkConfigMemberTwo);
-        hazelcastMemberTwo = Hazelcast.newHazelcastInstance(hazelcastConfigTwo);
+        hazelcastMemberTwo = Hazelcast.newHazelcastInstance(hazelcastConfig);
 
         logger.warn("Members Initialized");
     }

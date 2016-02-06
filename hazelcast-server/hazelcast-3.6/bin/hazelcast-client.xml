@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hazelcast-client>
+    <group>
+        <name>training</name>
+        <password>dev-pass</password>
+    </group>
+    <network>
+        <cluster-members>
+            <address>127.0.0.1:9701</address>
+        </cluster-members>
+    </network>
+</hazelcast-client>
