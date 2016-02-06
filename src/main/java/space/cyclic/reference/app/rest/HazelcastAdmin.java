@@ -29,4 +29,18 @@ public class HazelcastAdmin {
     public String getDestroyThing() throws ExecutionException, InterruptedException {
         return hazelcastSingleton.getDestroyThing().get();
     }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/get/partitionThing")
+    public String getPartitionThing() throws ExecutionException, InterruptedException {
+        return hazelcastSingleton.getPartitionThing().get();
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/get/atomicLongThing")
+    public String getAtomicLongThing() throws ExecutionException, InterruptedException {
+        return hazelcastSingleton.getAtomicLongThing().get();
+    }
 }

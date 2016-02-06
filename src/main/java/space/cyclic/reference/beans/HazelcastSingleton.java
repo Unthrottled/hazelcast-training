@@ -20,18 +20,19 @@ import java.util.concurrent.Future;
 @Singleton
 public class HazelcastSingleton {
     private static Logger logger = Logger.getLogger(HazelcastSingleton.class);
-    private static final String queueQ = "queueQ";
-    private static final String semaphoreOfSolitude = "best semaphore";
-    private static final String superSemaphore = "better than best semaphore";
-    private static final String megaSemaphore = "ultra semaphore";
-    private static final String partitionOne = "BestPartition";
-    private static final String partitionTwo = "BestPartition";
+    private static final String QUEUE_Q = "QUEUE_Q";
+    private static final String SEMAPHORE_OF_SOLITUDE = "best semaphore";
+    private static final String SUPER_SEMAPHORE = "better than best semaphore";
+    private static final String MEGA_SEMAPHORE = "ultra semaphore";
+    private static final String PARTITION_ONE = "BestPartition";
+    private static final String PARTITION_TWO = "BestPartition";
+    private static final String ATOMIC_LONG_ONE = "best atomic long";
 
     HazelcastInstance hazelcastMemberOne;
     HazelcastInstance hazelcastMemberTwo;
 
     @PostConstruct
-    public void startHazelcastNode(){
+    public void startHazelcastNode() {
         String thing = getClass().getClassLoader().getResource("hazelcast-client.xml").getFile();
         Config hazelcastConfig = new Config().setConfigurationFile(new File(thing));
 
@@ -79,15 +80,14 @@ public class HazelcastSingleton {
      * HazelcastInstance.shutdown(): If you are not using your HazelcastInstance anymore, make sure
      * to shut it down by calling the shutdown() method on the HazelcastInstance. This will release all its
      * resources and end network communication.
-     *
+     * <p/>
      * Hazelcast.shutdownAll(): This method is very practical for testing purposes if you do not have
      * control over the creation of Hazelcast instances, but you want to make sure that all instances are
      * being destroyed.
-     *
      */
 
     @PreDestroy
-    public void tidyUp(){
+    public void tidyUp() {
         hazelcastMemberOne.shutdown();
         hazelcastMemberTwo.shutdown();
     }
@@ -99,7 +99,7 @@ public class HazelcastSingleton {
     }
 
     @Asynchronous
-    public Future<String> getDestroyThing(){
+    public Future<String> getDestroyThing() {
         StringBuilder toReturn = new StringBuilder();
         IQueue<String> queueOne = getQueueQMemberTwo();
         IQueue<String> queueTwo = getQueueQMemberOne();
@@ -116,10 +116,11 @@ public class HazelcastSingleton {
     /**
      * The other type is a non-partitioned data structure, like the IAtomicLong or the ISemaphore, where
      * only a single partition is responsible for storing the main instance.
+     *
      * @return
      */
     @Asynchronous
-    public Future<String> getPartitionThing(){
+    public Future<String> getPartitionThing() {
         StringBuilder toReturn = new StringBuilder();
         ISemaphore semaphoreOne = getSemaphoreOfSolitude();
         ISemaphore semaphoreTwo = getSuperSemaphore();
@@ -132,36 +133,88 @@ public class HazelcastSingleton {
         return new AsyncResult<>(toReturn.toString());
     }
 
+    /**
+     * apply: Applies the function to the value in the IAtomicLong without changing the actual value and
+     returns the result.
+     • alterAndGet: Alters the value stored in the IAtomicLong by applying the function, storing the result in
+     the IAtomicLong and returning the result.
+     • getAndAlter: Alters the value stored in the IAtomicLong by applying the function and returning the
+     original value.
+     • alter: Alters the value stored in the IAtomicLong by applying the function. This method will not send
+     back a result.
+     * @return
+     */
 
-    public IQueue<String> getQueueQMemberOne(){
-        return hazelcastMemberOne.getQueue(queueQ);
+    @Asynchronous
+    public Future<String> getAtomicLongThing() {
+        StringBuilder toReturn = new StringBuilder();
+        IAtomicLong nuclear = getAtomicLong();
+        IFunction<Long, Long> bestFunction = numberToApply -> {
+            Long longToReturn = numberToApply;
+            if (longToReturn < 10) {
+                longToReturn += 2l;
+            }
+            else {
+                longToReturn += 1l;
+            }
+            return longToReturn;
+        };
+        nuclear.getAndSet(1);
+        Long bestFunctionResult = nuclear.apply(bestFunction);
+        toReturn.append("apply.result:").append(bestFunctionResult).append('\n');
+        toReturn.append("apply.value:").append(nuclear.get()).append('\n');
+
+        nuclear.getAndSet(1);
+        nuclear.alter(bestFunction);
+        toReturn.append("alter.result:").append(nuclear.get()).append('\n');
+
+        nuclear.getAndSet(1);
+        bestFunctionResult = nuclear.alterAndGet(bestFunction);
+        toReturn.append("alterAndGet.result:").append(bestFunctionResult).append('\n');
+        toReturn.append("alterAndGet.value:").append(nuclear.get()).append('\n');
+
+        nuclear.getAndSet(1);
+        bestFunctionResult = nuclear.getAndAlter(bestFunction);
+        toReturn.append("getAndAlter.result:").append(bestFunctionResult).append('\n');
+        toReturn.append("getAndAlter.value:").append(nuclear.get()).append('\n');
+
+        return new AsyncResult<>(toReturn.toString());
     }
 
-    public IQueue<String> getQueueQMemberTwo(){
-        return hazelcastMemberOne.getQueue(queueQ);
+
+    public IQueue<String> getQueueQMemberOne() {
+        return hazelcastMemberOne.getQueue(QUEUE_Q);
     }
 
-    private long getIdGenForMemberOne(){
+    public IQueue<String> getQueueQMemberTwo() {
+        return hazelcastMemberOne.getQueue(QUEUE_Q);
+    }
+
+    private long getIdGenForMemberOne() {
         return hazelcastMemberOne.getIdGenerator("idGenerator").newId();
     }
 
-    private long getIdGenForMemberTwo(){
+    private long getIdGenForMemberTwo() {
         return hazelcastMemberTwo.getIdGenerator("idGenerator").newId();
     }
 
     public ISemaphore getSemaphoreOfSolitude() {
-        return hazelcastMemberOne.getSemaphore(semaphoreOfSolitude + "@" + partitionOne);
+        return hazelcastMemberOne.getSemaphore(SEMAPHORE_OF_SOLITUDE + "@" + PARTITION_ONE);
     }
 
     public ISemaphore getSemaphoreOfSolitudeNoPartitionSpecified() {
-        return hazelcastMemberOne.getSemaphore(semaphoreOfSolitude);
+        return hazelcastMemberOne.getSemaphore(SEMAPHORE_OF_SOLITUDE);
     }
 
     public ISemaphore getSuperSemaphore() {
-        return hazelcastMemberOne.getSemaphore(superSemaphore+ "@" + partitionTwo);
+        return hazelcastMemberOne.getSemaphore(SUPER_SEMAPHORE + "@" + PARTITION_TWO);
     }
 
-    public ISemaphore getMegaSemaphore(){
-        return hazelcastMemberOne.getSemaphore(megaSemaphore);
+    public ISemaphore getMegaSemaphore() {
+        return hazelcastMemberOne.getSemaphore(MEGA_SEMAPHORE);
+    }
+
+    public IAtomicLong getAtomicLong() {
+        return hazelcastMemberTwo.getAtomicLong(ATOMIC_LONG_ONE);
     }
 }
