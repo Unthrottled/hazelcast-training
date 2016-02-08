@@ -3,7 +3,6 @@ package space.cyclic.reference.beans;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.ExecutorConfig;
 import com.hazelcast.config.MapConfig;
-import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.*;
 import org.apache.log4j.Logger;
 import space.cyclic.reference.ProjectConstants;
@@ -23,7 +22,7 @@ public class HazelcastSingleton {
     private static final String SUPER_SEMAPHORE = "better than best semaphore";
     private static final String MEGA_SEMAPHORE = "ultra semaphore";
     private static final String PARTITION_ONE = "BestPartition";
-    private static final String PARTITION_TWO = "BestPartition";
+    private static final String PARTITION_TWO = "BetterPartition";
     private static final String ATOMIC_LONG_ONE = "best atomic long";
 
     HazelcastInstance hazelcastMemberOne;
