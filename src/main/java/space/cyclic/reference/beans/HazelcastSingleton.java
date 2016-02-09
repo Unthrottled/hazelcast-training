@@ -24,6 +24,7 @@ public class HazelcastSingleton {
     private static final String PARTITION_ONE = "BestPartition";
     private static final String PARTITION_TWO = "BetterPartition";
     private static final String ATOMIC_LONG_ONE = "best atomic long";
+    private static final String JOHN_LOCKE = "Don't tell me what I can't do!";
 
     HazelcastInstance hazelcastMemberOne;
     HazelcastInstance hazelcastMemberTwo;
@@ -149,6 +150,13 @@ public class HazelcastSingleton {
             }
             return longToReturn;
         };
+
+        /**
+         * From a performance point of view, it is better to send the function to the data then the data to
+         the function. Often the function is a lot smaller than the value and therefore the function is
+         cheaper to send over the line. Also, the function only needs to be transferred once to the
+         target machine, while the value needs to be transferred twice.
+         */
         nuclear.getAndSet(1);
         Long bestFunctionResult = nuclear.apply(bestFunction);
         toReturn.append("apply.result:").append(bestFunctionResult).append('\n');
@@ -170,6 +178,18 @@ public class HazelcastSingleton {
 
         return new AsyncResult<>(toReturn.toString());
     }
+
+    /**
+     * The following idiom is recommended when you use a lock (it doesn’t matter if it is a Hazelcast lock or a
+     lock provided by the JRE):
+     * lock.lock();
+     try{
+     ...do your stuff.
+     }finally{
+     lock.unlock();
+     }
+     * @return
+     */
 
 
     public IQueue<String> getQueueQMemberOne() {
@@ -206,5 +226,9 @@ public class HazelcastSingleton {
 
     public IAtomicLong getAtomicLong() {
         return hazelcastMemberTwo.getAtomicLong(ATOMIC_LONG_ONE);
+    }
+
+    public ILock getLocked(){
+        return hazelcastMemberTwo.getLock(JOHN_LOCKE);
     }
 }
