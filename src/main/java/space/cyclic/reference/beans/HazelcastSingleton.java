@@ -12,13 +12,13 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.util.concurrent.Future;
 
 @SuperBean
-@ApplicationScoped
+@Singleton
 public class HazelcastSingleton {
     private static Logger logger = Logger.getLogger(HazelcastSingleton.class);
     private static final String QUEUE_Q = "QUEUE_Q";
