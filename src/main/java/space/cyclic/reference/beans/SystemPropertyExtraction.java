@@ -1,10 +1,8 @@
 package space.cyclic.reference.beans;
 
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
 
-@Startup
-@Singleton
+@ApplicationScoped
 public class SystemPropertyExtraction {
 
     public String getProperty(String validSystemProperty) {

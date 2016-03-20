@@ -6,6 +6,7 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.*;
 import org.apache.log4j.Logger;
 import space.cyclic.reference.ProjectConstants;
+import space.cyclic.reference.interfaces.SuperBean;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.util.concurrent.Future;
 
+@SuperBean
 @ApplicationScoped
 public class HazelcastSingleton {
     private static Logger logger = Logger.getLogger(HazelcastSingleton.class);
@@ -110,7 +112,7 @@ public class HazelcastSingleton {
      * The other type is a non-partitioned data structure, like the IAtomicLong or the ISemaphore, where
      * only a single partition is responsible for storing the main instance.
      *
-     * @return
+     * 
      */
     @Asynchronous
     public Future<String> getPartitionThing() {
@@ -135,7 +137,7 @@ public class HazelcastSingleton {
      original value.
      • alter: Alters the value stored in the IAtomicLong by applying the function. This method will not send
      back a result.
-     * @return
+     * 
      */
 
     @Asynchronous
@@ -190,7 +192,7 @@ public class HazelcastSingleton {
      }finally{
      lock.unlock();
      }
-     * @return
+     * 
      */
 
 
@@ -232,5 +234,10 @@ public class HazelcastSingleton {
 
     public ILock getLocked(){
         return hazelcastMemberTwo.getLock(JOHN_LOCKE);
+    }
+
+    @Override
+    public String toString(){
+        return "Super Bean: HazelcastSingleton!!";
     }
 }

@@ -1,8 +1,8 @@
 package space.cyclic.reference.app.rest;
 
 import space.cyclic.reference.beans.HazelcastSingleton;
+import space.cyclic.reference.interfaces.SuperBean;
 
-import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 @Stateless
 @Path("/admin")
 public class HazelcastAdmin {
-    @Inject
+    @Inject @SuperBean
     HazelcastSingleton hazelcastSingleton;
 
     @GET
