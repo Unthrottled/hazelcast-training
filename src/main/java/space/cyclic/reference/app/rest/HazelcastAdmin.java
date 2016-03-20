@@ -11,7 +11,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.concurrent.ExecutionException;
 
-@Stateless
 @Path("/admin")
 public class HazelcastAdmin {
     @Inject @SuperBean
