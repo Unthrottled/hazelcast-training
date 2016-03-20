@@ -11,6 +11,7 @@
         <jdk.version>1.8</jdk.version>
         <resteasy.version>2.2.3.GA</resteasy.version>
         <maven.war.plugin.version>2.1.1</maven.war.plugin.version>
+        <cdi.version>1.2</cdi.version>
     </properties>
 
     <dependencies>
@@ -29,6 +30,11 @@
             <groupId>javax.ejb</groupId>
             <artifactId>javax.ejb-api</artifactId>
             <version>3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>${cdi.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
