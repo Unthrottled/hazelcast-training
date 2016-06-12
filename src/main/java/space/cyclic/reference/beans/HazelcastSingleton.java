@@ -2,6 +2,7 @@ package space.cyclic.reference.beans;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.ExecutorConfig;
+import com.hazelcast.config.FileSystemXmlConfig;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.*;
 import org.apache.log4j.Logger;
@@ -15,6 +16,7 @@ import javax.ejb.Asynchronous;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.concurrent.Future;
 
 @SuperBean
@@ -37,7 +39,7 @@ public class HazelcastSingleton {
     SystemPropertyExtraction systemPropertyExtraction;
 
     @PostConstruct
-    public void startHazelcastNode() {
+    public void startHazelcastNode() throws FileNotFoundException {
 
         /**
          * Hazelcast config is not updatable: Once a HazelcastInstance is created, the Config that was used to
@@ -46,7 +48,7 @@ public class HazelcastSingleton {
          * read for the first time.
          */
 
-        Config hazelcastConfig = new Config().setConfigurationFile(
+        Config hazelcastConfig = new FileSystemXmlConfig(
                 new File(systemPropertyExtraction.getProperty(ProjectConstants.HAZELCAST_CLIENT)));
 
         ExecutorConfig executorConfig = new ExecutorConfig()
