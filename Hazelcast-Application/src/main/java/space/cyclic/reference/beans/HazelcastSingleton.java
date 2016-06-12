@@ -2,17 +2,29 @@ package space.cyclic.reference.beans;
 
 import com.hazelcast.config.*;
 import com.hazelcast.core.*;
+import com.hazelcast.mapreduce.Job;
+import com.hazelcast.mapreduce.JobTracker;
+import com.hazelcast.mapreduce.KeyValueSource;
 import org.apache.log4j.Logger;
+import space.cyclic.reference.dependencies.hazelcast.mappers.PermutationMapper;
+import space.cyclic.reference.dependencies.hazelcast.mappers.SetReducerFactory;
 import space.cyclic.reference.interfaces.SuperBean;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.FileNotFoundException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
 
 @SuperBean
 @Singleton
@@ -26,6 +38,8 @@ public class HazelcastSingleton {
     private static final String PARTITION_TWO = "BetterPartition";
     private static final String ATOMIC_LONG_ONE = "best atomic long";
     private static final String JOHN_LOCKE = "Don't tell me what I can't do!";
+    private static final String TEST_LIST = "I AM LIST";
+    private static final String TEST_JOB_TRACKER = "I AM JOB TRACKER";
 
     HazelcastInstance hazelcastMemberOne;
     HazelcastInstance hazelcastMemberTwo;
@@ -84,12 +98,14 @@ public class HazelcastSingleton {
     }
 
     @Asynchronous
+    @Lock(LockType.READ)
     public Future<String> getThing() {
         return new AsyncResult<>(String.format("hazelcast thing works\nidGenOne: %d\nidGenTwo: %d",
                 getIdGenForMemberOne(), getIdGenForMemberTwo()));
     }
 
     @Asynchronous
+    @Lock(LockType.READ)
     public Future<String> getDestroyThing() {
         StringBuilder toReturn = new StringBuilder();
         IQueue<String> queueOne = getQueueQMemberTwo();
@@ -111,6 +127,7 @@ public class HazelcastSingleton {
      * 
      */
     @Asynchronous
+    @Lock(LockType.READ)
     public Future<String> getPartitionThing() {
         StringBuilder toReturn = new StringBuilder();
         ISemaphore semaphoreOne = getSemaphoreOfSolitude();
@@ -230,6 +247,24 @@ public class HazelcastSingleton {
 
     public ILock getLocked(){
         return hazelcastMemberTwo.getLock(JOHN_LOCKE);
+    }
+
+    @Lock(LockType.READ)
+    public IList<String> getTestList(){
+        return hazelcastMemberTwo.getList(TEST_LIST);
+    }
+
+    @Lock(LockType.READ)
+    public Map<String, Set<String>> getTestMapReduce() throws ExecutionException, InterruptedException {
+        KeyValueSource<String, String> stringStringKeyValueSource = KeyValueSource.fromList(getTestList());
+        JobTracker jobTracker = hazelcastMemberOne.getJobTracker(TEST_JOB_TRACKER);
+        Job<String, String> job = jobTracker.newJob(stringStringKeyValueSource);
+        ICompletableFuture<Map<String, Set<String>>> completableFuture = job
+                .mapper(new PermutationMapper())
+                .reducer(new SetReducerFactory<>())
+                .submit();
+
+        return completableFuture.get();
     }
 
     @Override
