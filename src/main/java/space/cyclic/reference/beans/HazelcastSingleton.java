@@ -1,9 +1,6 @@
 package space.cyclic.reference.beans;
 
-import com.hazelcast.config.Config;
-import com.hazelcast.config.ExecutorConfig;
-import com.hazelcast.config.FileSystemXmlConfig;
-import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.*;
 import com.hazelcast.core.*;
 import org.apache.log4j.Logger;
 import space.cyclic.reference.ProjectConstants;
@@ -48,8 +45,7 @@ public class HazelcastSingleton {
          * read for the first time.
          */
 
-        Config hazelcastConfig = new FileSystemXmlConfig(
-                new File(systemPropertyExtraction.getProperty(ProjectConstants.HAZELCAST_CLIENT)));
+        Config hazelcastConfig = new ClasspathXmlConfig("hazelcast.xml");
 
         ExecutorConfig executorConfig = new ExecutorConfig()
                 .setName("space.cyclic.reference.bestExecutor")
