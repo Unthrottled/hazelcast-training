@@ -3,7 +3,6 @@ package space.cyclic.reference.beans;
 import com.hazelcast.config.*;
 import com.hazelcast.core.*;
 import org.apache.log4j.Logger;
-import space.cyclic.reference.ProjectConstants;
 import space.cyclic.reference.interfaces.SuperBean;
 
 import javax.annotation.PostConstruct;
@@ -12,7 +11,6 @@ import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.concurrent.Future;
 
