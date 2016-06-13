@@ -19,12 +19,10 @@ import javax.ejb.LockType;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.FileNotFoundException;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.function.Predicate;
 
 @SuperBean
 @Singleton

@@ -3,7 +3,6 @@ package space.cyclic.reference.app.rest;
 import space.cyclic.reference.beans.HazelcastSingleton;
 import space.cyclic.reference.interfaces.SuperBean;
 
-import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
