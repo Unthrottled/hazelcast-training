@@ -255,7 +255,7 @@ public class HazelcastSingleton {
     @Lock(LockType.READ)
     public Map<String, Set<String>> getTestMapReduce() throws ExecutionException, InterruptedException {
         KeyValueSource<String, String> stringStringKeyValueSource = KeyValueSource.fromList(getTestList());
-        JobTracker jobTracker = hazelcastMemberOne.getJobTracker(TEST_JOB_TRACKER);
+        JobTracker jobTracker = hazelcastMemberTwo.getJobTracker(TEST_JOB_TRACKER);
         Job<String, String> job = jobTracker.newJob(stringStringKeyValueSource);
         ICompletableFuture<Map<String, Set<String>>> completableFuture = job
                 .mapper(new PermutationMapper())

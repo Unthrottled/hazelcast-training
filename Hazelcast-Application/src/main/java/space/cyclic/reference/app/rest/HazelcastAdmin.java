@@ -8,6 +8,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 @Path("/admin")
@@ -41,5 +43,12 @@ public class HazelcastAdmin {
     @Path("/get/atomicLongThing")
     public String getAtomicLongThing() throws ExecutionException, InterruptedException {
         return hazelcastSingleton.getAtomicLongThing().get();
+    }
+
+    @GET
+    @Produces("application/json")
+    @Path("/get/mapReduce")
+    public Map<String, Set<String>> getMapReduce() throws ExecutionException, InterruptedException {
+        return hazelcastSingleton.getTestMapReduce();
     }
 }
