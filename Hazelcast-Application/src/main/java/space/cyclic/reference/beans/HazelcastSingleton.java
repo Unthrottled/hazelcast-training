@@ -261,7 +261,6 @@ public class HazelcastSingleton {
                 .mapper(new PermutationMapper())
                 .reducer(new SetReducerFactory<>())
                 .submit();
-
         return completableFuture.get();
     }
 
