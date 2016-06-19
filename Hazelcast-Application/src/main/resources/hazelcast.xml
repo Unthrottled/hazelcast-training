@@ -85,6 +85,12 @@
 
     </map>
 
+    <map name="persistentMap">
+        <map-store enabled="true">
+            <class-name></class-name>
+        </map-store>
+    </map>
+
     <multimap name="default">
         <backup-count>1</backup-count>
         <value-collection-type>SET</value-collection-type>
