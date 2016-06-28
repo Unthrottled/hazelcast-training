@@ -19,6 +19,7 @@
         <cdi.version>1.2</cdi.version>
         <concurrent.version>1.0</concurrent.version>
         <mongo-driver-version>3.1.1</mongo-driver-version>
+        <mongo-jack-version>2.6.1</mongo-jack-version>
     </properties>
 
     <dependencies>
@@ -30,7 +31,7 @@
         </dependency>
         <dependency>
             <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast</artifactId>
+            <artifactId>hazelcast-all</artifactId>
             <version>3.6</version>
         </dependency>
         <dependency>

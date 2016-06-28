@@ -87,7 +87,7 @@
 
     <map name="persistentMap">
         <map-store enabled="true">
-            <class-name></class-name>
+            <class-name>space.cyclic.reference.persistence.PersistenceMapStore</class-name>
         </map-store>
     </map>
 

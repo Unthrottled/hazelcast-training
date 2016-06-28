@@ -1,5 +1,7 @@
 package space.cyclic.reference.beans;
 
+import com.hazelcast.client.HazelcastClient;
+import com.hazelcast.client.config.XmlClientConfigBuilder;
 import com.hazelcast.config.*;
 import com.hazelcast.core.*;
 import com.hazelcast.mapreduce.Job;
@@ -19,6 +21,7 @@ import javax.ejb.LockType;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -41,12 +44,13 @@ public class HazelcastSingleton {
 
     HazelcastInstance hazelcastMemberOne;
     HazelcastInstance hazelcastMemberTwo;
+    HazelcastInstance hazelcastClientOne;
 
     @Inject
     SystemPropertyExtraction systemPropertyExtraction;
 
     @PostConstruct
-    public void startHazelcastNode() throws FileNotFoundException {
+    public void startHazelcastNode() throws IOException {
 
         /**
          * Hazelcast config is not updatable: Once a HazelcastInstance is created, the Config that was used to
@@ -76,6 +80,19 @@ public class HazelcastSingleton {
 
         hazelcastMemberTwo = Hazelcast.newHazelcastInstance(hazelcastConfig);
 
+
+        /**
+         * Smart Client: In smart mode, clients connect to each cluster node.
+         * Since each data partition uses the well known and consistent hashing algorithm,
+         * each client can send an operation to the relevant cluster node,
+         * which increases the overall throughput and efficiency.
+         * Smart mode is the default mode.
+         */
+        XmlClientConfigBuilder xmlClientConfigBuilder = new XmlClientConfigBuilder("hazelcast-client.xml");
+
+        hazelcastClientOne = HazelcastClient.newHazelcastClient(xmlClientConfigBuilder.build());
+
+
         logger.warn("Members Initialized");
     }
 
@@ -93,6 +110,12 @@ public class HazelcastSingleton {
     public void tidyUp() {
         hazelcastMemberOne.shutdown();
         hazelcastMemberTwo.shutdown();
+
+        /**
+         * As a final step, when you are done with your client, you can shut it down as shown below.
+         * This will release all the used resources and will close connections to the cluster.
+         */
+        hazelcastClientOne.shutdown();
     }
 
     @Asynchronous
